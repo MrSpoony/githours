@@ -1,3 +1,3 @@
-module github.com/MrSpoony/gitstats
+module github.com/MrSpoony/githours
 
-go 1.19
+go 1.20
