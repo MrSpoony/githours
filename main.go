@@ -36,7 +36,7 @@ func main() {
 		}
 	}
 
-	perHour := make(map[int]int)
+	perHour := make(map[int]int, 24)
 
 	for _, t := range times {
 		perHour[t.Local().Hour()]++
@@ -53,17 +53,36 @@ func main() {
 		}
 	}
 
-	log10 := int(math.Ceil(math.Log10(float64(max))))
-
 	termWidth, err := getWidth()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	scaleFactor := math.Max(math.Min(80, float64(termWidth)-float64(8+log10))/float64(max), 0)
+	log10 := int(math.Ceil(math.Log10(float64(max))))
 
-	for i := 0; i < 24; i++ {
-		fmt.Printf(fmt.Sprintf("%%02d: %%%dd  %%s\n", log10), i, perHour[i], strings.Repeat("#", int(float64(perHour[i])*scaleFactor)))
+	delimiter := "  "
+	// every thing is double escaped because we need to determine the format string first.
+	// afterwards the formatString looks something like this:
+	// "%02d: %3d%s\n"
+	//                                    vv------- this is set by log10
+	formatString := fmt.Sprintf("%%02d: %%%dd%%s\n", log10)
+	// minus 1 because of the newline
+	prefixLen := len(fmt.Sprintf(formatString, 23, max, delimiter)) - 1
+
+	// Max width should be 80
+	width := math.Min(float64(termWidth-prefixLen), float64(80-prefixLen))
+
+	// must have at least one hashtag
+	scaleFactor := math.Max(width/float64(max), 0)
+
+	for hour, amount := range perHour {
+		numberOfHashtags := int(math.Round(float64(amount) * scaleFactor))
+		hashtags := delimiter + strings.Repeat("#", numberOfHashtags)
+		if scaleFactor == 0 {
+			hashtags = ""
+		}
+
+		fmt.Printf(formatString, hour, amount, hashtags)
 	}
 }
 
