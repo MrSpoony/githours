@@ -12,42 +12,18 @@ import (
 )
 
 func main() {
-	out, err := exec.Command("git", "log", "--format='%at'").Output()
+	times, err := getTimes()
 	if err != nil {
-		log.Fatalln(string(out), err)
-	}
-
-	split := strings.Fields(string(out))
-	for i := range split {
-		split[i] = strings.TrimSpace(split[i])
-		split[i] = strings.Trim(split[i], "'")
-		split[i] = strings.TrimSpace(split[i])
-	}
-
-	times := make([]time.Time, len(split))
-	for i := range split {
-		sec, err := strconv.ParseInt(split[i], 10, 64)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		times[i] = time.Unix(sec, 0)
-		if err != nil {
-			log.Fatalln(err)
-		}
+		log.Fatalln(err)
 	}
 
 	perHour := make(map[int]int, 24)
-
 	for _, t := range times {
 		perHour[t.Local().Hour()]++
 	}
 
-	min := math.MaxInt
-	max := -1
+	max := 0
 	for _, cnt := range perHour {
-		if cnt < min {
-			min = cnt
-		}
 		if cnt > max {
 			max = cnt
 		}
@@ -84,6 +60,32 @@ func main() {
 
 		fmt.Printf(formatString, hour, amount, hashtags)
 	}
+}
+
+func getTimes() ([]time.Time, error) {
+	out, err := exec.Command("git", "log", "--format='%at'").Output()
+	if err != nil {
+		return nil, err
+	}
+
+	split := strings.Fields(string(out))
+	for i := range split {
+		split[i] = strings.TrimSpace(split[i])
+		split[i] = strings.Trim(split[i], "'")
+		split[i] = strings.TrimSpace(split[i])
+	}
+
+	times := make([]time.Time, len(split))
+	for i := range split {
+		sec, err := strconv.ParseInt(split[i], 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		times[i] = time.Unix(sec, 0)
+	}
+
+	return times, err
 }
 
 func getWidth() (int, error) {
