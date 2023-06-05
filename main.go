@@ -38,8 +38,8 @@ func main() {
 
 	perHour := make(map[int]int)
 
-	for _, datetime := range times {
-		perHour[datetime.Local().Hour()]++
+	for _, t := range times {
+		perHour[t.Local().Hour()]++
 	}
 
 	min := math.MaxInt
