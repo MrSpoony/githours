@@ -60,7 +60,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	scaleFactor := math.Min(80, float64(termWidth)-float64(8+log10)) / float64(max)
+	scaleFactor := math.Max(math.Min(80, float64(termWidth)-float64(8+log10))/float64(max), 0)
 
 	for i := 0; i < 24; i++ {
 		fmt.Printf(fmt.Sprintf("%%02d: %%%dd  %%s\n", log10), i, perHour[i], strings.Repeat("#", int(float64(perHour[i])*scaleFactor)))
