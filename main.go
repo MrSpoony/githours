@@ -17,7 +17,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	perHour := make(map[int]int, 24)
+	perHour := make([]int, 24)
 	for _, t := range times {
 		perHour[t.Local().Hour()]++
 	}
